@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useParams, Link } from 'react-router-dom'
-import { QRCodeSVG } from 'qrcode.react'
 import { supabase } from '../lib/supabase'
+import BarcodeEAN13 from '../components/BarcodeEAN13'
 
 function formatData(dataISO) {
   if (!dataISO) return ''
@@ -20,36 +20,26 @@ function EtichettaLabel({ prodotto }) {
         width: '30mm',
         height: '50mm',
         display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: 'column',
         backgroundColor: '#ffffff',
         overflow: 'hidden',
         boxSizing: 'border-box',
         padding: '1.5mm',
-        gap: '2mm',
         fontFamily: 'Arial, Helvetica, sans-serif',
       }}
     >
-      {/* QR Code: 22×22mm */}
-      <div style={{ width: '22mm', height: '22mm', flexShrink: 0 }}>
-        <QRCodeSVG
-          value={prodotto.qr_code}
-          size={83}
-          level="M"
-          includeMargin={false}
-          style={{ width: '22mm', height: '22mm', display: 'block' }}
-        />
-      </div>
+      {/* Barcode EAN-13: larghezza piena, altezza proporzionale */}
+      <BarcodeEAN13 value={prodotto.barcode} />
 
-      {/* Testo a destra */}
+      {/* Testo sotto il barcode */}
       <div
         style={{
           flex: 1,
-          minWidth: 0,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          gap: '1.5mm',
+          gap: '1mm',
+          marginTop: '1.5mm',
           overflow: 'hidden',
         }}
       >
@@ -86,7 +76,6 @@ export default function StampaEtichetta() {
   const [loading, setLoading] = useState(true)
   const [errore, setErrore] = useState(null)
 
-  // Inietta @page e regole print specifiche per questa pagina
   useEffect(() => {
     const style = document.createElement('style')
     style.id = 'etichetta-print-styles'
@@ -139,7 +128,6 @@ export default function StampaEtichetta() {
       })
   }, [id])
 
-  // Avvia la stampa automaticamente quando il prodotto è caricato
   useEffect(() => {
     if (prodotto) {
       const t = setTimeout(() => window.print(), 300)
@@ -178,13 +166,18 @@ export default function StampaEtichetta() {
       {/* Preview a schermo — nascosta in stampa */}
       <div className="print:hidden flex flex-col items-center gap-3">
         <p className="text-xs text-gray-400 uppercase tracking-wide font-medium">
-          Anteprima — 50 × 30 mm
+          Anteprima — 30 × 50 mm
         </p>
         <div style={{ border: '1px dashed #9ca3af', display: 'inline-block' }}>
           <EtichettaLabel prodotto={prodotto} />
         </div>
+        {!prodotto.barcode && (
+          <p className="text-xs text-red-400 text-center max-w-xs">
+            ⚠️ Questo prodotto non ha ancora un barcode. Salvalo di nuovo per generarlo.
+          </p>
+        )}
         <p className="text-xs text-gray-400 text-center max-w-xs">
-          La stampa si avvia automaticamente. Nel dialogo di stampa seleziona formato etichetta 50×30 mm.
+          La stampa si avvia automaticamente. Nel dialogo di stampa seleziona formato 30×50 mm.
         </p>
       </div>
 

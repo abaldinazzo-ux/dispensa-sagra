@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS prodotti (
   data_preparazione DATE NOT NULL DEFAULT CURRENT_DATE,
   note             TEXT,
   qr_code          UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
+  barcode          TEXT UNIQUE,
   creato_il        TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -27,6 +28,7 @@ CREATE TABLE IF NOT EXISTS movimenti (
 -- Indici per le query più comuni
 CREATE INDEX IF NOT EXISTS idx_prodotti_data_prep ON prodotti(data_preparazione ASC);
 CREATE INDEX IF NOT EXISTS idx_prodotti_qr_code   ON prodotti(qr_code);
+CREATE INDEX IF NOT EXISTS idx_prodotti_barcode    ON prodotti(barcode);
 CREATE INDEX IF NOT EXISTS idx_movimenti_data_ora  ON movimenti(data_ora DESC);
 CREATE INDEX IF NOT EXISTS idx_movimenti_prodotto  ON movimenti(prodotto_id);
 

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { generaEAN13 } from '../lib/ean13'
 
 const UNITA = ['pezzi', 'kg', 'porzioni', 'litri', 'g', 'confezioni']
 
@@ -30,6 +31,8 @@ export default function AggiungiProdotto() {
     setSaving(true)
     setErrore(null)
 
+    const barcode = generaEAN13()
+
     const { data, error } = await supabase
       .from('prodotti')
       .insert([{
@@ -38,6 +41,7 @@ export default function AggiungiProdotto() {
         unita: form.unita,
         data_preparazione: form.data_preparazione,
         note: form.note.trim() || null,
+        barcode,
       }])
       .select()
       .single()

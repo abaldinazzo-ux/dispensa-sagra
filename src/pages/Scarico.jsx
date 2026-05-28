@@ -10,7 +10,7 @@ function formatData(dataISO) {
 }
 
 export default function Scarico() {
-  const [qrInput, setQrInput] = useState('')
+  const [barcodeInput, setBarcodeInput] = useState('')
   const [prodotto, setProdotto] = useState(null)
   const [cercando, setCercando] = useState(false)
   const [errore, setErrore] = useState(null)
@@ -35,11 +35,11 @@ export default function Scarico() {
     const { data, error } = await supabase
       .from('prodotti')
       .select('*')
-      .eq('qr_code', codice.trim())
+      .eq('barcode', codice.trim())
       .single()
 
     if (error || !data) {
-      setErrore('Prodotto non trovato. Verifica il codice QR.')
+      setErrore('Prodotto non trovato. Verifica il codice a barre.')
     } else if (data.quantita <= 0) {
       setErrore('Questo prodotto è già stato completamente scaricato.')
     } else {
@@ -50,10 +50,9 @@ export default function Scarico() {
   }
 
   function handleKeyDown(e) {
-    // Lo scanner USB preme invio alla fine
-    if (e.key === 'Enter' && qrInput.trim()) {
+    if (e.key === 'Enter' && barcodeInput.trim()) {
       e.preventDefault()
-      cercaProdotto(qrInput)
+      cercaProdotto(barcodeInput)
     }
   }
 
@@ -98,7 +97,7 @@ export default function Scarico() {
       nuovaQuantita,
     })
     setProdotto(null)
-    setQrInput('')
+    setBarcodeInput('')
     setQuantitaScarico('')
     setNoteScarico('')
     setSaving(false)
@@ -107,7 +106,7 @@ export default function Scarico() {
 
   function reset() {
     setProdotto(null)
-    setQrInput('')
+    setBarcodeInput('')
     setQuantitaScarico('')
     setNoteScarico('')
     setErrore(null)
@@ -132,31 +131,31 @@ export default function Scarico() {
         </div>
       )}
 
-      {/* Input QR */}
+      {/* Input barcode */}
       <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm mb-4">
         <label className="block text-sm font-semibold text-gray-700 mb-2">
-          📷 Scansiona o digita il codice QR
+          🔍 Scansiona il codice a barre EAN-13
         </label>
         <div className="flex gap-2">
           <input
             ref={inputRef}
             type="text"
-            value={qrInput}
-            onChange={(e) => setQrInput(e.target.value)}
+            value={barcodeInput}
+            onChange={(e) => setBarcodeInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Scansiona con lo scanner USB (invio automatico) o incolla qui…"
-            className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+            placeholder="Scansiona con lo scanner USB (invio automatico) o digita qui…"
+            className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent font-mono tracking-wider"
           />
           <button
-            onClick={() => cercaProdotto(qrInput)}
-            disabled={cercando || !qrInput.trim()}
+            onClick={() => cercaProdotto(barcodeInput)}
+            disabled={cercando || !barcodeInput.trim()}
             className="bg-sky-600 hover:bg-sky-700 disabled:bg-gray-300 text-white font-bold px-4 py-3 rounded-xl transition-colors text-sm"
           >
             {cercando ? '…' : 'Cerca'}
           </button>
         </div>
         <p className="text-xs text-gray-400 mt-2">
-          Lo scanner USB invia invio automaticamente — basta puntare e scansionare.
+          Lo scanner USB invia invio automaticamente dopo la scansione — basta puntare sull'etichetta.
         </p>
       </div>
 
