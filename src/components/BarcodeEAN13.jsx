@@ -1,39 +1,36 @@
-import { useMemo } from 'react'
-import bwipjs from 'bwip-js'
+import { useEffect, useRef } from 'react'
+import JsBarcode from 'jsbarcode'
 
 export default function BarcodeEAN13({ value, style }) {
-  const src = useMemo(() => {
-    if (!value) return ''
-    try {
-      const svg = bwipjs.toSVG({
-        bcid: 'ean13',
-        text: value,
-        scale: 3,
-        height: 15,
-        includetext: true,
-        textxalign: 'center',
-        paddingleft: 5,
-        paddingright: 5,
-        paddingtop: 3,
-        paddingbottom: 3,
-      })
-      return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
-    } catch (e) {
-      console.error('BarcodeEAN13:', e)
-      return ''
-    }
+  const svgRef = useRef(null)
+
+  useEffect(() => {
+    if (!svgRef.current || !value) return
+    JsBarcode(svgRef.current, value, {
+      format: 'EAN13',
+      width: 2.5,
+      height: 60,
+      displayValue: true,
+      fontSize: 14,
+      margin: 5,
+    })
   }, [value])
 
-  if (!src) return (
-    <div style={{ ...style, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #ccc' }}>
+  if (!value) return (
+    <div style={{
+      ...style,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      border: '1px dashed #ccc',
+    }}>
       <span style={{ fontSize: '6pt', color: '#999' }}>Barcode non disponibile</span>
     </div>
   )
 
   return (
-    <img
-      src={src}
-      alt={value}
+    <svg
+      ref={svgRef}
       style={{ display: 'block', width: '100%', height: 'auto', ...style }}
     />
   )
