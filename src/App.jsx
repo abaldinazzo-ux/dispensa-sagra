@@ -5,6 +5,8 @@ import AggiungiProdotto from './pages/AggiungiProdotto'
 import StampaEtichetta from './pages/StampaEtichetta'
 import Scarico from './pages/Scarico'
 import Storico from './pages/Storico'
+import Anagrafica from './pages/Anagrafica'
+import Dashboard from './pages/Dashboard'
 
 export default function App() {
   return (
@@ -16,6 +18,8 @@ export default function App() {
           <Route path="etichetta/:id" element={<StampaEtichetta />} />
           <Route path="scarico" element={<Scarico />} />
           <Route path="storico" element={<Storico />} />
+          <Route path="anagrafica" element={<Anagrafica />} />
+          <Route path="dashboard" element={<Dashboard />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

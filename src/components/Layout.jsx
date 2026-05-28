@@ -1,10 +1,11 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom'
 
 const navItems = [
+  { to: '/dashboard', label: 'Report', icon: '📊' },
   { to: '/', label: 'Giacenze', icon: '🧊', exact: true },
   { to: '/aggiungi', label: 'Aggiungi', icon: '➕' },
   { to: '/scarico', label: 'Scarico', icon: '📦' },
-  { to: '/storico', label: 'Storico', icon: '📋' },
+  { to: '/anagrafica', label: 'Prodotti', icon: '📝' },
 ]
 
 export default function Layout() {

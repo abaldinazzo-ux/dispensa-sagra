@@ -36,7 +36,18 @@ CREATE INDEX IF NOT EXISTS idx_movimenti_prodotto  ON movimenti(prodotto_id);
 -- ALTER TABLE prodotti ENABLE ROW LEVEL SECURITY;
 -- ALTER TABLE movimenti ENABLE ROW LEVEL SECURITY;
 
+-- Tabella anagrafica prodotti predefiniti
+CREATE TABLE IF NOT EXISTS prodotti_anagrafica (
+  id     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  nome   TEXT NOT NULL,
+  unita  TEXT NOT NULL DEFAULT 'pezzi',
+  attivo BOOLEAN NOT NULL DEFAULT true
+);
+
+CREATE INDEX IF NOT EXISTS idx_prodotti_anagrafica_nome ON prodotti_anagrafica(nome ASC);
+
 -- Permessi pubblici (anonimo) per uso senza autenticazione
 -- Rimuovere o limitare in produzione
 GRANT SELECT, INSERT, UPDATE, DELETE ON prodotti  TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON movimenti TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON prodotti_anagrafica TO anon;
