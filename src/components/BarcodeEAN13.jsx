@@ -9,7 +9,7 @@ export default function BarcodeEAN13({ value, style }) {
         bcid: 'ean13',
         text: value,
         scale: 3,
-        height: 10,
+        height: 6,
         includetext: true,
         textxalign: 'center',
       })

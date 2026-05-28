@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import BarcodeEAN13 from '../components/BarcodeEAN13'
@@ -13,12 +12,14 @@ function formatData(dataISO) {
   })
 }
 
+// Etichetta 50×30mm landscape — un'unica istanza nel DOM
 function EtichettaLabel({ prodotto }) {
   return (
     <div
+      className="etichetta"
       style={{
-        width: '30mm',
-        height: '50mm',
+        width: '50mm',
+        height: '30mm',
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: '#ffffff',
@@ -28,28 +29,18 @@ function EtichettaLabel({ prodotto }) {
         fontFamily: 'Arial, Helvetica, sans-serif',
       }}
     >
-      {/* Barcode EAN-13: larghezza piena, altezza proporzionale */}
+      {/* Barcode orizzontale, larghezza piena */}
       <BarcodeEAN13 value={prodotto.barcode} />
 
       {/* Testo sotto il barcode */}
-      <div
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          gap: '1mm',
-          marginTop: '1.5mm',
-          overflow: 'hidden',
-        }}
-      >
+      <div style={{ marginTop: '1.5mm', overflow: 'hidden' }}>
         <p
           style={{
             fontSize: '7pt',
             fontWeight: 'bold',
             color: '#000000',
             lineHeight: 1.2,
-            margin: 0,
+            margin: '0 0 1mm 0',
             overflow: 'hidden',
             display: '-webkit-box',
             WebkitLineClamp: 2,
@@ -60,10 +51,7 @@ function EtichettaLabel({ prodotto }) {
           {prodotto.nome}
         </p>
         <p style={{ fontSize: '6pt', color: '#333333', margin: 0, lineHeight: 1.3 }}>
-          Prep: {formatData(prodotto.data_preparazione)}
-        </p>
-        <p style={{ fontSize: '6pt', fontWeight: 'bold', color: '#000000', margin: 0, lineHeight: 1.3 }}>
-          {prodotto.quantita} {prodotto.unita}
+          {formatData(prodotto.data_preparazione)} · {prodotto.quantita} {prodotto.unita}
         </p>
       </div>
     </div>
@@ -76,36 +64,31 @@ export default function StampaEtichetta() {
   const [loading, setLoading] = useState(true)
   const [errore, setErrore] = useState(null)
 
+  // CSS di stampa — iniettato dinamicamente, rimosso al dismount
   useEffect(() => {
     const style = document.createElement('style')
     style.id = 'etichetta-print-styles'
     style.textContent = `
       @page {
-        size: 30mm 50mm portrait;
-        margin: 0mm;
+        size: 50mm 30mm landscape;
+        margin: 0;
       }
       @media print {
         html, body {
-          width: 30mm;
-          height: 50mm;
+          height: auto;
           margin: 0;
           padding: 0;
-          background: white;
-          overflow: hidden;
         }
-        #root {
-          display: none !important;
+        body {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
         }
-        #etichetta-print {
-          display: block !important;
+        * { visibility: hidden; }
+        .etichetta, .etichetta * { visibility: visible; }
+        .etichetta {
           position: fixed;
           top: 0;
           left: 0;
-          width: 30mm;
-          height: 50mm;
-          margin: 0;
-          padding: 0;
-          overflow: hidden;
           page-break-after: avoid;
           page-break-inside: avoid;
         }
@@ -128,6 +111,7 @@ export default function StampaEtichetta() {
       })
   }, [id])
 
+  // Avvia stampa automaticamente quando il prodotto è caricato
   useEffect(() => {
     if (prodotto) {
       const t = setTimeout(() => window.print(), 300)
@@ -150,9 +134,9 @@ export default function StampaEtichetta() {
 
   return (
     <div>
-      {/* Header — nascosto in stampa */}
-      <div className="flex items-center justify-between mb-6 print:hidden">
-        <Link to="/" className="text-sky-600 hover:text-sky-800 text-sm font-medium flex items-center gap-1">
+      {/* Header — display:none in stampa (print:hidden) */}
+      <div className="print:hidden flex items-center justify-between mb-6">
+        <Link to="/" className="text-sky-600 hover:text-sky-800 text-sm font-medium">
           ← Giacenze
         </Link>
         <button
@@ -163,31 +147,29 @@ export default function StampaEtichetta() {
         </button>
       </div>
 
-      {/* Preview a schermo — nascosta in stampa */}
-      <div className="print:hidden flex flex-col items-center gap-3">
-        <p className="text-xs text-gray-400 uppercase tracking-wide font-medium">
-          Anteprima — 30 × 50 mm
+      {/* Preview + etichetta reale in un unico wrapper senza display:none in stampa.
+          In stampa il wrapper è visibility:hidden ma .etichetta dentro resta visible.
+          position:fixed la porta in top:0,left:0 indipendentemente dal DOM parent. */}
+      <div className="flex flex-col items-center gap-3">
+        <p className="print:hidden text-xs text-gray-400 uppercase tracking-wide font-medium">
+          Anteprima — 50 × 30 mm
         </p>
+
+        {/* Bordo tratteggiato: visibile a schermo, invisible in stampa (visibility:hidden).
+            NON ha print:hidden, così .etichetta figlio può usare visibility:visible. */}
         <div style={{ border: '1px dashed #9ca3af', display: 'inline-block' }}>
           <EtichettaLabel prodotto={prodotto} />
         </div>
+
         {!prodotto.barcode && (
-          <p className="text-xs text-red-400 text-center max-w-xs">
-            ⚠️ Questo prodotto non ha ancora un barcode. Salvalo di nuovo per generarlo.
+          <p className="print:hidden text-xs text-red-400 text-center max-w-xs">
+            ⚠️ Nessun barcode — aggiungi di nuovo il prodotto per generarlo.
           </p>
         )}
-        <p className="text-xs text-gray-400 text-center max-w-xs">
-          La stampa si avvia automaticamente. Nel dialogo di stampa seleziona formato 30×50 mm.
+        <p className="print:hidden text-xs text-gray-400 text-center max-w-xs">
+          La stampa si avvia automaticamente. Seleziona etichetta 50×30 mm nel dialogo di stampa.
         </p>
       </div>
-
-      {/* Etichetta per la stampa — portal su document.body, fuori da #root */}
-      {createPortal(
-        <div id="etichetta-print" style={{ display: 'none' }}>
-          <EtichettaLabel prodotto={prodotto} />
-        </div>,
-        document.body
-      )}
     </div>
   )
 }
