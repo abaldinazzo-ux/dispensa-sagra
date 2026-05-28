@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useParams, Link } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { supabase } from '../lib/supabase'
@@ -91,8 +92,8 @@ export default function StampaEtichetta() {
     style.id = 'etichetta-print-styles'
     style.textContent = `
       @page {
-        size: 50mm 30mm;
-        margin: 0;
+        size: 50mm 30mm landscape;
+        margin: 0mm;
       }
       @media print {
         html, body {
@@ -101,13 +102,13 @@ export default function StampaEtichetta() {
           margin: 0;
           padding: 0;
           background: white;
+          overflow: hidden;
         }
-        body * {
-          visibility: hidden;
+        #root {
+          display: none !important;
         }
         #etichetta-print {
           display: block !important;
-          visibility: visible;
           position: fixed;
           top: 0;
           left: 0;
@@ -115,9 +116,9 @@ export default function StampaEtichetta() {
           height: 30mm;
           margin: 0;
           padding: 0;
-        }
-        #etichetta-print * {
-          visibility: visible;
+          overflow: hidden;
+          page-break-after: avoid;
+          page-break-inside: avoid;
         }
       }
     `
@@ -187,10 +188,13 @@ export default function StampaEtichetta() {
         </p>
       </div>
 
-      {/* Etichetta per la stampa — nascosta a schermo, visibile solo in stampa */}
-      <div id="etichetta-print" className="hidden">
-        <EtichettaLabel prodotto={prodotto} />
-      </div>
+      {/* Etichetta per la stampa — portal su document.body, fuori da #root */}
+      {createPortal(
+        <div id="etichetta-print" style={{ display: 'none' }}>
+          <EtichettaLabel prodotto={prodotto} />
+        </div>,
+        document.body
+      )}
     </div>
   )
 }
