@@ -31,16 +31,16 @@ function EtichettaLabel({ prodotto }) {
         fontFamily: 'Arial, Helvetica, sans-serif',
       }}
     >
-      {/* Barcode centrato, min 60% larghezza, altezza sufficiente per scanner fisico */}
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-        <BarcodeEAN13 value={prodotto.barcode} style={{ minWidth: '60%', width: '100%' }} />
+      {/* Barcode: almeno 18mm di altezza su 30mm totali */}
+      <div style={{ width: '100%', minHeight: '18mm', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <BarcodeEAN13 value={prodotto.barcode} style={{ width: '100%', minHeight: '18mm' }} />
       </div>
 
       {/* Testo centrato sotto il barcode */}
       <div style={{ width: '100%', marginTop: '1mm', textAlign: 'center', overflow: 'hidden' }}>
         <p
           style={{
-            fontSize: '9pt',
+            fontSize: '7pt',
             fontWeight: 'bold',
             color: '#000000',
             lineHeight: 1.2,
@@ -54,7 +54,7 @@ function EtichettaLabel({ prodotto }) {
         >
           {prodotto.nome}
         </p>
-        <p style={{ fontSize: '9pt', color: '#333333', margin: 0, lineHeight: 1.3 }}>
+        <p style={{ fontSize: '7pt', color: '#333333', margin: 0, lineHeight: 1.3 }}>
           {formatData(prodotto.data_preparazione)} · {prodotto.quantita} {prodotto.unita}
         </p>
       </div>

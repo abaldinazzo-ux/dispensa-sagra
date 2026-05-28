@@ -12,11 +12,11 @@ export default function BarcodeEAN13({ value, style }) {
 
     JsBarcode(canvas, value, {
       format: 'EAN13',
-      width: 3 * scale,
-      height: 80 * scale,
+      width: 2 * scale,
+      height: 50 * scale,
       displayValue: true,
-      fontSize: 16 * scale,
-      margin: 10 * scale,
+      fontSize: 12 * scale,
+      margin: 4 * scale,
     })
 
     setSrc(canvas.toDataURL('image/png', 1.0))
