@@ -9,9 +9,13 @@ export default function BarcodeEAN13({ value, style }) {
         bcid: 'ean13',
         text: value,
         scale: 3,
-        height: 6,
+        height: 15,
         includetext: true,
         textxalign: 'center',
+        paddingleft: 5,
+        paddingright: 5,
+        paddingtop: 3,
+        paddingbottom: 3,
       })
       return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
     } catch (e) {

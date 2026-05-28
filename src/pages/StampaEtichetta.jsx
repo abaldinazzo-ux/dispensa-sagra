@@ -31,9 +31,9 @@ function EtichettaLabel({ prodotto }) {
         fontFamily: 'Arial, Helvetica, sans-serif',
       }}
     >
-      {/* Barcode centrato */}
+      {/* Barcode centrato, min 60% larghezza, altezza sufficiente per scanner fisico */}
       <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-        <BarcodeEAN13 value={prodotto.barcode} />
+        <BarcodeEAN13 value={prodotto.barcode} style={{ minWidth: '60%', width: '100%' }} />
       </div>
 
       {/* Testo centrato sotto il barcode */}
