@@ -23,6 +23,8 @@ export default function Giacenze() {
   const [prodotti, setProdotti] = useState([])
   const [loading, setLoading] = useState(true)
   const [errore, setErrore] = useState(null)
+  const [eliminando, setEliminando] = useState(null) // id del prodotto in corso di eliminazione
+  const [conferma, setConferma] = useState(null)     // { id, nome }
 
   async function carica() {
     setLoading(true)
@@ -34,6 +36,16 @@ export default function Giacenze() {
     if (error) setErrore(error.message)
     else setProdotti(data || [])
     setLoading(false)
+  }
+
+  async function eliminaProdotto(id) {
+    setEliminando(id)
+    // Elimina prima i movimenti collegati (FK è ON DELETE SET NULL, non CASCADE)
+    await supabase.from('movimenti').delete().eq('prodotto_id', id)
+    await supabase.from('prodotti').delete().eq('id', id)
+    setProdotti(prev => prev.filter(p => p.id !== id))
+    setConferma(null)
+    setEliminando(null)
   }
 
   useEffect(() => { carica() }, [])
@@ -54,6 +66,34 @@ export default function Giacenze() {
 
   return (
     <div>
+      {/* Dialogo conferma eliminazione */}
+      {conferma && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
+            <p className="text-gray-800 font-semibold text-base mb-1">Elimina prodotto</p>
+            <p className="text-gray-600 text-sm mb-5">
+              Sei sicuro di voler eliminare <strong>{conferma.nome}</strong>?
+              Verranno eliminati anche tutti i movimenti collegati.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConferma(null)}
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 rounded-xl transition-colors"
+              >
+                Annulla
+              </button>
+              <button
+                onClick={() => eliminaProdotto(conferma.id)}
+                disabled={eliminando === conferma.id}
+                className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-red-300 text-white font-bold py-2.5 rounded-xl transition-colors"
+              >
+                {eliminando === conferma.id ? 'Eliminazione…' : 'Elimina'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-xl font-bold text-gray-800">Giacenze</h2>
         <Link
@@ -109,13 +149,22 @@ export default function Giacenze() {
                       <p className="text-xs text-gray-400 mt-1 italic truncate">{p.note}</p>
                     )}
                   </div>
-                  <Link
-                    to={`/etichetta/${p.id}`}
-                    className="flex-shrink-0 bg-gray-100 hover:bg-sky-100 text-gray-600 hover:text-sky-700 rounded-xl p-2 text-sm transition-colors"
-                    title="Stampa etichetta"
-                  >
-                    🏷️
-                  </Link>
+                  <div className="flex items-center gap-1">
+                    <Link
+                      to={`/etichetta/${p.id}`}
+                      className="flex-shrink-0 bg-gray-100 hover:bg-sky-100 text-gray-600 hover:text-sky-700 rounded-xl p-2 text-sm transition-colors"
+                      title="Stampa etichetta"
+                    >
+                      🏷️
+                    </Link>
+                    <button
+                      onClick={() => setConferma({ id: p.id, nome: p.nome })}
+                      className="flex-shrink-0 bg-red-50 hover:bg-red-100 text-red-500 hover:text-red-700 rounded-xl p-2 text-sm transition-colors"
+                      title="Elimina prodotto"
+                    >
+                      🗑️
+                    </button>
+                  </div>
                 </div>
               </div>
             )
