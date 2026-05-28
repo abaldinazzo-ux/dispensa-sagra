@@ -1,19 +1,25 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import JsBarcode from 'jsbarcode'
 
 export default function BarcodeEAN13({ value, style }) {
-  const svgRef = useRef(null)
+  const [src, setSrc] = useState('')
 
   useEffect(() => {
-    if (!svgRef.current || !value) return
-    JsBarcode(svgRef.current, value, {
+    if (!value) return
+
+    const scale = (window.devicePixelRatio || 1) * 3
+    const canvas = document.createElement('canvas')
+
+    JsBarcode(canvas, value, {
       format: 'EAN13',
-      width: 2.5,
-      height: 60,
+      width: 3 * scale,
+      height: 80 * scale,
       displayValue: true,
-      fontSize: 14,
-      margin: 5,
+      fontSize: 16 * scale,
+      margin: 10 * scale,
     })
+
+    setSrc(canvas.toDataURL('image/png', 1.0))
   }, [value])
 
   if (!value) return (
@@ -28,9 +34,12 @@ export default function BarcodeEAN13({ value, style }) {
     </div>
   )
 
+  if (!src) return null
+
   return (
-    <svg
-      ref={svgRef}
+    <img
+      src={src}
+      alt={value}
       style={{ display: 'block', width: '100%', height: 'auto', ...style }}
     />
   )
