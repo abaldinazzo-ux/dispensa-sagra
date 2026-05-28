@@ -17,8 +17,8 @@ function EtichettaLabel({ prodotto }) {
   return (
     <div
       style={{
-        width: '50mm',
-        height: '30mm',
+        width: '30mm',
+        height: '50mm',
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
@@ -92,13 +92,13 @@ export default function StampaEtichetta() {
     style.id = 'etichetta-print-styles'
     style.textContent = `
       @page {
-        size: 50mm 30mm landscape;
+        size: 30mm 50mm portrait;
         margin: 0mm;
       }
       @media print {
         html, body {
-          width: 50mm;
-          height: 30mm;
+          width: 30mm;
+          height: 50mm;
           margin: 0;
           padding: 0;
           background: white;
@@ -112,8 +112,8 @@ export default function StampaEtichetta() {
           position: fixed;
           top: 0;
           left: 0;
-          width: 50mm;
-          height: 30mm;
+          width: 30mm;
+          height: 50mm;
           margin: 0;
           padding: 0;
           overflow: hidden;
